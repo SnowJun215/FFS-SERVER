@@ -1,7 +1,7 @@
 const baseSchema = require('../base');
 module.exports = (sequelize, DataTypes) => {
   return sequelize.define('file_manage', Object.assign(baseSchema(DataTypes), {
-    keys: {
+    key: {
       type: DataTypes.STRING,
       allowNull: false,
       column: '用于提取文件的key'
