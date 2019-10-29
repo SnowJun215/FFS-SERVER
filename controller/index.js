@@ -1,21 +1,30 @@
 const saveFile = require('../util/save-file');
 const readFile = require('../util/read-file');
+const deleteFile = require('../util/delete-file');
 const snowflake = require('../util/snowflake');
+
+const getFile = async (key) => {
+  if (!key) {
+    throw '缺少key';
+  }
+  let fileInfo = await global.mysql.file_manage.findOne({
+    where: {
+      key
+    }
+  });
+  return fileInfo.dataValues;
+};
+
 module.exports = {
   // 获取文件
   async getFile (req, res) {
     const {key, type} = req.body;
-    if (!key) {
-      throw '缺少key';
-    }
-    let fileInfo = await global.mysql.file_manage.findOne({
-      where: {
-        key
-      }
+
+    const {path, file_name} = await getFile(key).catch(err => {
+      res.status(500).send(err.message);
     });
-    const {path, file_name} = fileInfo.dataValues;
     if (!path) {
-      throw '无此文件';
+      res.status(500).send('无此文件');
     }
     console.log({key, type, path});
     switch (type) {
@@ -95,6 +104,20 @@ module.exports = {
     if (!key) {
       throw '缺少必要参数';
     }
+    const {path} = await getFile(key).catch(err => {
+      res.status(500).send(err.message);
+    });
+    if (!path) {
+      res.status(500).send('无此文件');
+    }
+    let file = null;
+    try {
+      file = await deleteFile(path, 'utf-8');
+    } catch (e) {
+      console.log('deleteFile error'.red, e.message);
+      res.status(500).send(e.message);
+    }
+
     let _res = global.mysql.file_manage.destroy({
       where: {
         key
