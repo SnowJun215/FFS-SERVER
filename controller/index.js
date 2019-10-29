@@ -32,7 +32,12 @@ module.exports = {
         if (redisContent) {
           content = redisContent;
         } else {
-          content = await readFile(path, 'utf-8');
+          try {
+            content = await readFile(path, 'utf-8');
+          } catch (e) {
+            console.log('readFile error'.red, e.message);
+            res.status(500).send(e.message);
+          }
         }
         global.redis.set(`file_content_${key}`, content);
         res.status(200).send(content);
@@ -45,7 +50,10 @@ module.exports = {
   async uploadFile (req, res) {
     let fileSaveRes = {};
     try {
-      fileSaveRes = await saveFile(req);
+      fileSaveRes = await saveFile(req).catch(err => {
+        console.log('saveFile error', err);
+        res.status(500).send(err.message);
+      });
     } catch (e) {
       //
     }

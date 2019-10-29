@@ -28,7 +28,7 @@ app.all('*', function (req, res, next) {
   next();
 });
 
-app.use('/', indexRouter);
+app.use('/file', indexRouter);
 app.use('/users', userRouter);
 
 // catch 404 and forward to error handler
